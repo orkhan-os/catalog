@@ -13,7 +13,7 @@ metadata:
 spec:
   clusterSelector:
     matchLabels:
-      group: demo
+      catalog: "CLUSTER_LABEL"
   serviceSpec:
     services:
     {{ services | replace("\n", "\n    ") }}
