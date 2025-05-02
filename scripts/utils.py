@@ -13,6 +13,21 @@ metadata:
 spec:
   clusterSelector:
     matchLabels:
+      group: demo
+  serviceSpec:
+    services:
+    {{ services | replace("\n", "\n    ") }}
+"""
+
+
+mcs_tpl_multi = """
+apiVersion: k0rdent.mirantis.com/v1alpha1
+kind: MultiClusterService
+metadata:
+  name: {{ app }}
+spec:
+  clusterSelector:
+    matchLabels:
       catalog: "CLUSTER_LABEL"
   serviceSpec:
     services:
@@ -65,6 +80,17 @@ def render_mcs_template(app: str):
     rendered = template.render(data).strip() + "\n"
     return rendered
 
+def render_mcs_template_multi(app: str):
+    template = Template(mcs_tpl_multi)
+    chart_data = get_chart_data(app)
+    chart_values_data = get_chart_values_data(app)
+    app_data = get_app_data(app)
+    namespace = app_data.get('test_namespace', app)
+    mcs_services = get_mcs_services(namespace, chart_data, chart_values_data)
+    data = {"app": app, "services": mcs_services}
+    rendered = template.render(data).strip() + "\n"
+    return rendered
+
 
 def render_mcs(args):
     app = args.app
@@ -73,12 +99,19 @@ def render_mcs(args):
     with open(f"apps/{app}/mcs.yaml", "w", encoding='utf-8') as file:
         file.write(output)
 
+def render_mcs_multi(args):
+    app = args.app
+    output = render_mcs_template_multi(app)
+    print(output)
+    with open(f"apps/{app}/mcs.yaml", "w", encoding='utf-8') as file:
+        file.write(output)
+
 
 def get_servicetemplate_install_cmd(repo: str, charts: list) -> str:
     cmd_lines = []
     for chart in charts:
-        cmd_lines.append(f'helm install {chart['name']} {repo}/{chart['name']}-service-template \\')
-        cmd_lines.append(f'  --version {chart['version']} -n kcm-system')
+        cmd_lines.append(f"helm install {chart['name']} {repo}/{chart['name']}-service-template \\")
+        cmd_lines.append(f"  --version {chart['version']} -n kcm-system")
     cmd = "\n".join(cmd_lines)
     return cmd
 
@@ -162,6 +195,10 @@ subparsers = parser.add_subparsers(dest="command", required=True)
 install = subparsers.add_parser("render-mcs", help="Render MultiClusterService using app example chart")
 install.add_argument("app")
 install.set_defaults(func=render_mcs)
+
+install = subparsers.add_parser("render-mcs-multi", help="Render MultiClusterService using app example chart")
+install.add_argument("app")
+install.set_defaults(func=render_mcs_multi)
 
 install = subparsers.add_parser("install-servicetemplates", help="Install app example service templates")
 install.add_argument("app")

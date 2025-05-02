@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TIMEOUT=$((20 * 60))  
+TIMEOUT=$((60 * 60))  
 SECONDS=0
 SLEEP_INTERVAL=10
 

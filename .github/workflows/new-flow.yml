@@ -121,13 +121,13 @@ jobs:
           - name: Deploy Child Clusters
             if: env.DEPLOY_CHART == 'true' || env.DEPLOY_MULTICLUSTERSERVICE == 'true'
             run: |
-                AWS_SETTINGS="${{ github.event.inputs.aws_settings }}"
-                AZURE_SETTINGS="${{ github.event.inputs.azure_settings }}"
-                GCP_SETTINGS="${{ github.event.inputs.gcp_settings }}"
+                aws_settings="${{ github.event.inputs.aws_settings }}"
+                azure_settings="${{ github.event.inputs.azure_settings }}"
+                gcp_settings="${{ github.event.inputs.gcp_settings }}"
 
-                export AWS_SETTINGS=${AWS_SETTINGS:-'{"master_number":"1","master_type":"t3.small","worker_number":"1","worker_type":"t3.small"}'}
-                export AZURE_SETTINGS=${AZURE_SETTINGS:-'{"master_number":"1","master_type":"Standard_A4_v2","worker_number":"2","worker_type":"Standard_A4_v2"}'}
-                export GCP_SETTINGS=${GCP_SETTINGS:-'{"master_number":"1","master_type":"n2-standard-2","worker_number":"2","worker_type":"n2-standard-2"}'}
+                export aws_settings=${aws_settings:-'{"master_number":"1","master_type":"t3.medium","worker_number":"1","worker_type":"t3.medium"}'}
+                export azure_settings=${azure_settings:-'{"master_number":"1","master_type":"Standard_A4_v2","worker_number":"2","worker_type":"Standard_A4_v2"}'}
+                export gcp_settings=${gcp_settings:-'{"master_number":"1","master_type":"n2-standard-2","worker_number":"2","worker_type":"n2-standard-2"}'}
 
                 ./scripts/deploy_child_clusters.sh
 
@@ -143,14 +143,14 @@ jobs:
             run: |
                     export APP=${{ matrix.folder }}
                     export TEST_MODE=local
-                    ./scripts/deploy_example_chart.sh
+                    ./scripts/deploy_example_chart_multi.sh
 
           - name: Test - Uninstall Helm chart
             if: env.DEPLOY_CHART == 'true'
             run: |
                     export APP=${{ matrix.folder }}
                     export TEST_MODE=local
-                    ./scripts/uninstall_example_chart.sh
+                    ./scripts/uninstall_example_chart_multi.sh
 
 
 
@@ -158,22 +158,20 @@ jobs:
             if: env.INSTALL_SERVICETEMPLATES == 'true'
             run: |
                     export APP=${{ matrix.folder }}
-                    ./scripts/install_servicetemplates.sh
+                    ./scripts/install_servicetemplates_multi.sh
 
 
           - name: Test - Deploy MultiClusterDeployment
             if: env.DEPLOY_MULTICLUSTERSERVICE == 'true'
             run: |
                     export APP=${{ matrix.folder }}
-                    export TEST_MODE=local
-                    ./scripts/deploy_mcs.sh
+                    ./scripts/deploy_mcs_multi.sh
 
           - name: Test - Uninstall MultiClusterDeployment
             if: env.DEPLOY_MULTICLUSTERSERVICE == 'true'
             run: |
                     export APP=${{ matrix.folder }}
-                    export TEST_MODE=local
-                    ./scripts/remove_mcs.sh
+                    ./scripts/remove_mcs_multi.sh
 
           - name:  Delete child clusters
             run: ./scripts/delete_clds.sh

@@ -1,30 +1,32 @@
 #!/bin/bash
 set -euo pipefail
 
-AWS_MASTER_NUMBER=$(echo "$AWS_SETTINGS" | jq -r '.master_number')
-AWS_MASTER_INSTANCE_TYPE=$(echo "$AWS_SETTINGS" | jq -r '.master_type')
-AWS_WORKER_NUMBER=$(echo "$AWS_SETTINGS" | jq -r '.worker_number')
-AWS_WORKER_INSTANCE_TYPE=$(echo "$AWS_SETTINGS" | jq -r '.worker_type')
+aws_master_number=$(echo "$aws_settings" | jq -r '.master_number')
+aws_master_instance_type=$(echo "$aws_settings" | jq -r '.master_type')
+aws_worker_number=$(echo "$aws_settings" | jq -r '.worker_number')
+aws_worker_instance_type=$(echo "$aws_settings" | jq -r '.worker_type')
 
-AZURE_MASTER_NUMBER=$(echo "$AZURE_SETTINGS" | jq -r '.master_number')
-AZURE_MASTER_INSTANCE_TYPE=$(echo "$AZURE_SETTINGS" | jq -r '.master_type')
-AZURE_WORKER_NUMBER=$(echo "$AZURE_SETTINGS" | jq -r '.worker_number')
-AZURE_WORKER_INSTANCE_TYPE=$(echo "$AZURE_SETTINGS" | jq -r '.worker_type')
+azure_master_number=$(echo "$azure_settings" | jq -r '.master_number')
+azure_master_instance_type=$(echo "$azure_settings" | jq -r '.master_type')
+azure_worker_number=$(echo "$azure_settings" | jq -r '.worker_number')
+azure_worker_instance_type=$(echo "$azure_settings" | jq -r '.worker_type')
 
-GCP_MASTER_NUMBER=$(echo "$GCP_SETTINGS" | jq -r '.master_number')
-GCP_MASTER_INSTANCE_TYPE=$(echo "$GCP_SETTINGS" | jq -r '.master_type')
-GCP_WORKER_NUMBER=$(echo "$GCP_SETTINGS" | jq -r '.worker_number')
-GCP_WORKER_INSTANCE_TYPE=$(echo "$GCP_SETTINGS" | jq -r '.worker_type')
+gcp_master_number=$(echo "$gcp_settings" | jq -r '.master_number')
+gcp_master_instance_type=$(echo "$gcp_settings" | jq -r '.master_type')
+gcp_worker_number=$(echo "$gcp_settings" | jq -r '.worker_number')
+gcp_worker_instance_type=$(echo "$gcp_settings" | jq -r '.worker_type')
 
-for i in AWS AZURE GCP; do
+
+for i in aws azure gcp; do
   mkdir -p "${GITHUB_RUN_ID}/${i}"
   cp "/home/runner/${i}/cluster.yaml" "${GITHUB_RUN_ID}/${i}/cluster.yaml"
 
-  master_number_var="${i}_MASTER_NUMBER"
-  master_instance_var="${i}_MASTER_INSTANCE_TYPE"
-  worker_number_var="${i}_WORKER_NUMBER"
-  worker_instance_var="${i}_WORKER_INSTANCE_TYPE"
-  cluster_name="$(echo "${i,,}")-cluster-${GITHUB_RUN_ID}"
+master_number_var="${i}_master_number"
+master_instance_var="${i}_master_instance_type"
+worker_number_var="${i}_worker_number"
+worker_instance_var="${i}_worker_instance_type"
+cluster_name="$(echo "${i,,}")-cluster-${GITHUB_RUN_ID}"
+
 
   sed -i "s/MASTER_NUMBER/${!master_number_var}/g" "${GITHUB_RUN_ID}/${i}/cluster.yaml"
   sed -i "s/WORKER_NUMBER/${!worker_number_var}/g" "${GITHUB_RUN_ID}/${i}/cluster.yaml"
